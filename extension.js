@@ -1,5 +1,6 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
-// @author: <a href="mailto:mibus@mibus.org">Robert Mibus</a>
+// @author: <a href="mailto:--">Brian White</a>
+// @original_author: <a href="mailto:mibus@mibus.org">Robert Mibus</a>
 // GPLv2+
 
 const St = imports.gi.St;
@@ -22,188 +23,206 @@ const Convenience = Me.imports.convenience;
 const UPDATE_INTERVAL = 5000;
 
 const Timezones = [
-    'UTC',
-    'America/Los_Angeles',
-    'Australia/Adelaide',
-    'Australia/Perth',
-    'Australia/Melbourne',
-    'Australia/Sydney',
-    'Pacific/Auckland',
+  'Europe/Berlin',
+  'Europe/London',
+  'America/Toronto',
+  'America/Vancouver',
+  'Australia/Perth',
+  'Australia/Sydney',
+  'Pacific/Auckland',
 ];
 
 const AltTimeMenuButton = new Lang.Class({
-	Name: 'AltTimeMenuButton',
-	Extends: PanelMenu.Button,
+  Name: 'AltTimeMenuButton',
+  Extends: PanelMenu.Button,
 
-    _schema: null,
-    _clock_settings: null,
-    selected_tz: null,
+  _schema: null,
+  _clock_settings: null,
+  selected_tz: null,
 
-    _init: function() {
+  _init: function(){
 
-        let item;
+    let item;
 
-        let menuAlignment = 0.25;
-        this.parent(menuAlignment);
+    let menuAlignment = 0.25;
+    this.parent(menuAlignment);
 
-	// Widget set-up
-        this._clockDisplay = new St.Label({text: 'Initialising', opacity: 150});
-        this.actor.add_actor(this._clockDisplay);
-	this.actor.set_y_align(Clutter.ActorAlign.CENTER);
+    // Widget set-up
+    this._clockDisplay = new St.Label({text: 'Initialising', opacity: 150});
+    this.actor.add_actor(this._clockDisplay);
+    this.actor.set_y_align(Clutter.ActorAlign.CENTER);
 
-	// Importing clock-related things from outside
-        this._clock = new GnomeDesktop.WallClock();
-	this._clock_settings = new Gio.Settings({ schema: 'org.gnome.desktop.interface' });
+    // Importing clock-related things from outside
+    this._clock = new GnomeDesktop.WallClock();
+    this._clock_settings = new Gio.Settings({ schema: 'org.gnome.desktop.interface' });
 
-	// Loading our own settings
-        this._schema = Convenience.getSettings();
-	let tzid = this._schema.get_string('timezone');
+    // Loading our own settings
+    this._schema = Convenience.getSettings();
+    let tzid = this._schema.get_string('timezone');
 
-	// Making the main timezone selection menu
-	var seen_tz = false;
-	for (var i = 0; i < Timezones.length; i++) {
-		let tz = Timezones[i];
-		if (tz == tzid)
-			seen_tz = true;
-		this.menu.addAction (
-			tz,
-			Lang.bind(this, function () {
-				this.set_tz (tz);
-			}));
-	}
+    // Making the main timezone selection menu
+    var seen_tz = false;
+    for (var i = 0; i < Timezones.length; i++){
+      let tz = Timezones[i];
+      if (tz == tzid)
+        seen_tz = true;
+      this.menu.addAction (
+        tz,
+        Lang.bind(this, function (){
+          this.set_tz (tz);
+        }));
+    }
 
-	// Adding "Other..."
-	this.menu.addAction ('Other...',
-		Lang.bind(this, function() {
-		    var d = new CustomDialog(this);
-		    d.open();
-		}));
+    // Adding "Other..."
+    this.menu.addAction ('Other...',
+      Lang.bind(this, function(){
+        var d = new CustomDialog(this);
+        d.open();
+      }));
 
-	// Internally loading our stored timezone, including adding it as an extra menu option if appropriate
-	if (seen_tz)
-		this.set_tz (tzid);
-        else
-		this.set_custom_tz(tzid);
-    },
+    // Internally loading our stored timezone, including adding it as an extra menu option if appropriate
+    if (seen_tz)
+      this.set_tz (tzid);
+    else
+      this.set_custom_tz(tzid);
+  },
 
-    set_custom_tz: function (tzid) {
-	this.set_tz(tzid);
-	this.menu.addAction (tzid,
-			Lang.bind(this, function () {
-				this.set_tz (tzid);
-			}));
-    },
+  set_custom_tz: function (tzid){
+    this.set_tz(tzid);
+    this.menu.addAction (tzid,
+      Lang.bind(this, function (){
+        this.set_tz (tzid);
+      }));
+  },
 
-    set_tz: function (tzid) {
-	this.selected_tz = GLib.TimeZone.new(tzid);
-	this.update_time();
-	this._schema.set_string('timezone', tzid);
-    },
+  set_tz: function (tzid){
+    this.selected_tz = GLib.TimeZone.new(tzid);
+    this.update_time();
+    this._schema.set_string('timezone', tzid);
+  },
 
-    get_alternate_time_string: function() {
-	if (!this.selected_tz)
-	    return "Initialising";
+  get_alternate_time_string: function(){
+    if (!this.selected_tz)
+      return "Initialising";
 
-        var now = GLib.DateTime.new_now(this.selected_tz);
-	if (this._clock_settings.get_enum('clock-format')) { // 12-Hour
-		var remote_time = now.format('%l:%M %p %Z');
-	} else { // 24-Hour
-		var remote_time = now.format('%R %Z');
-	}
+    var now = GLib.DateTime.new_now(this.selected_tz);
+    if (this._clock_settings.get_enum('clock-format')){ // 12-Hour
+      var remote_time = now.format('%l:%M %p %Z');
+    } else { // 24-Hour
+      var remote_time = now.format('%R %Z');
+    }
+    return remote_time;
+  },
 
-	return remote_time;
-    },
+  enable: function(){
+    this.clock_signal_id = this._clock.connect('notify::clock', Lang.bind(this, this.update_time));
+    this.update_time();
+  },
 
-    enable: function() {
-        this.clock_signal_id = this._clock.connect('notify::clock', Lang.bind(this, this.update_time));
-        this.update_time();
-    },
+  disable: function(){
+    this._clock.disconnect(this.clock_signal_id);
+  },
 
-    disable: function() {
-	this._clock.disconnect(this.clock_signal_id);
-    },
-
-    update_time: function() {
-        this._clockDisplay.set_text(this.get_alternate_time_string());
-    },
+  update_time: function(){
+    this._clockDisplay.set_text(this.get_alternate_time_string());
+  },
 
 });
 
-function MultiClock() {
-    this._init();
+function MultiClock(){
+  this._init();
 }
 
 MultiClock.prototype = {
-    button: null,
+  button_1: null,
+  button_2: null,
 
-    _init: function() {
-	this.button = new AltTimeMenuButton();
-    },
+  _init: function(){
+    this.button_1 = new AltTimeMenuButton();
+    this.button_2 = new AltTimeMenuButton();
+  },
 
-    enable: function() {
-        this.button.enable();
-	Main.ATMButton = this.button;
-	global.log (this.button);
-	global.log ('GNOME-Shell 3.6+ detected...');
-	Main.panel.addToStatusArea('multiclock',this.button,1,'center');
-	Main.panel.menuManager.addMenu(this.button.menu);
-    },
+  enable: function(){
+    this.button_1.enable();
+    this.button_2.enable();
+    
+    Main.ATMButton_1 = this.button_1;
+    Main.ATMButton_2 = this.button_2;
 
-    disable: function() {
-	Main.panel.menuManager.removeMenu(this.button.menu);
-	Main.panel._centerBox.remove_actor(this.button.container);
-	if (Main.panel.statusArea.hasOwnProperty('multiclock')) {
-		delete Main.panel.statusArea['multiclock'];
-	}
-        this.button.disable();
+    global.log (this.button_1);
+    global.log (this.button_2);
+    global.log ('GNOME-Shell 3.6+ detected...');
+    
+    Main.panel.addToStatusArea('multiclock_1', this.button_1, 0, 'center');
+    Main.panel.addToStatusArea('multiclock_2', this.button_2, 2, 'center');
+    
+    Main.panel.menuManager.addMenu(this.button_1.menu);
+    Main.panel.menuManager.addMenu(this.button_2.menu);
+  },
+
+  disable: function(){
+    Main.panel.menuManager.removeMenu(this.button_1.menu);
+    Main.panel.menuManager.removeMenu(this.button_2.menu);
+
+    Main.panel._centerBox.remove_actor(this.button_1.container);
+    Main.panel._centerBox.remove_actor(this.button_2.container);
+
+    if (Main.panel.statusArea.hasOwnProperty('multiclock_1')){
+      delete Main.panel.statusArea['multiclock_1'];
     }
+    if (Main.panel.statusArea.hasOwnProperty('multiClock_2')){
+      delete Main.panel.statusArea['multiClock_2'];
+    }
+    this.button_1.disable();
+    this.button_2.disable();
+  }
 }
 
-var CustomDialog = GObject.registerClass(class extends ModalDialog.ModalDialog {
-    _init(caller) {
-        super._init({ styleClass: 'run-dialog',
-                destroyOnClose: false });
-	this.caller = caller;
-	global.log('Started constructor for CustomDialog.');
-        let label = new St.Label({ style_class: 'run-dialog-label',
-                                   text: _("Enter a timezone identifier") });
+var CustomDialog = GObject.registerClass(class extends ModalDialog.ModalDialog{
+  _init(caller){
+    super._init({ styleClass: 'run-dialog',
+      destroyOnClose: false });
+    this.caller = caller;
+    global.log('Started constructor for CustomDialog.');
+    let label = new St.Label({ style_class: 'run-dialog-label',
+      text: _("Enter a timezone identifier") });
 
-        this.contentLayout.add(label, { x_fill: false,
-                                        x_align: St.Align.START,
-                                        y_align: St.Align.START });
+    this.contentLayout.add(label, { x_fill: false,
+      x_align: St.Align.START,
+      y_align: St.Align.START });
 
-        let entry = new St.Entry({ style_class: 'run-dialog-entry',
-                                   can_focus: true });
+    let entry = new St.Entry({ style_class: 'run-dialog-entry',
+      can_focus: true });
 
-        entry.label_actor = label;
+    entry.label_actor = label;
 
-	global.log('In constructor for CustomDialog.');
-        this._entryText = entry.clutter_text;
-        this.contentLayout.add(entry, { y_align: St.Align.START });
-        this.setInitialKeyFocus(this._entryText);
-        this.setButtons([{ action: this.close.bind(this),
-                           label: _("Close"),
-                           key: Clutter.Escape }]);
-        this._entryText.connect('activate', (o) => {
-            this.popModal();
-            this._run(o.get_text())
-	    this.close();
-        });
-	global.log('Done CustomDialog constructor');
-    }
-    _run(input) {
-	this.caller.set_custom_tz(input);
-    }
-    open() {
-	global.log('open() for CustomDialog');
-        this._entryText.set_text('');
-        super.open();
-    }
+    global.log('In constructor for CustomDialog.');
+    this._entryText = entry.clutter_text;
+    this.contentLayout.add(entry, { y_align: St.Align.START });
+    this.setInitialKeyFocus(this._entryText);
+    this.setButtons([{ action: this.close.bind(this),
+      label: _("Close"),
+      key: Clutter.Escape }]);
+    this._entryText.connect('activate', (o) => {
+      this.popModal();
+      this._run(o.get_text())
+      this.close();
+    });
+    global.log('Done CustomDialog constructor');
+  }
+  _run(input){
+    this.caller.set_custom_tz(input);
+  }
+  open(){
+    global.log('open() for CustomDialog');
+    this._entryText.set_text('');
+    super.open();
+  }
 });
 
-function init(meta) {
-    global.log("Starting up MultiClock!");
+function init(meta){
+  global.log("Starting up MultiClock!");
 
-    return new MultiClock();
+  return new MultiClock();
 }
 
