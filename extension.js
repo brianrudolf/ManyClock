@@ -129,11 +129,11 @@ const AltTimeMenuButton = new Lang.Class({
 
 });
 
-function MultiClock(){
+function ManyClock(){
   this._init();
 }
 
-MultiClock.prototype = {
+ManyClock.prototype = {
   button_1: null,
   button_2: null,
 
@@ -153,8 +153,8 @@ MultiClock.prototype = {
     global.log (this.button_2);
     global.log ('GNOME-Shell 3.6+ detected...');
     
-    Main.panel.addToStatusArea('multiclock_1', this.button_1, 0, 'center');
-    Main.panel.addToStatusArea('multiclock_2', this.button_2, 2, 'center');
+    Main.panel.addToStatusArea('manyclock_1', this.button_1, 0, 'center');
+    Main.panel.addToStatusArea('manyclock_2', this.button_2, 2, 'center');
     
     Main.panel.menuManager.addMenu(this.button_1.menu);
     Main.panel.menuManager.addMenu(this.button_2.menu);
@@ -167,11 +167,11 @@ MultiClock.prototype = {
     Main.panel._centerBox.remove_actor(this.button_1.container);
     Main.panel._centerBox.remove_actor(this.button_2.container);
 
-    if (Main.panel.statusArea.hasOwnProperty('multiclock_1')){
-      delete Main.panel.statusArea['multiclock_1'];
+    if (Main.panel.statusArea.hasOwnProperty('manyclock_1')){
+      delete Main.panel.statusArea['manyclock_1'];
     }
-    if (Main.panel.statusArea.hasOwnProperty('multiClock_2')){
-      delete Main.panel.statusArea['multiClock_2'];
+    if (Main.panel.statusArea.hasOwnProperty('manyClock_2')){
+      delete Main.panel.statusArea['manyClock_2'];
     }
     this.button_1.disable();
     this.button_2.disable();
@@ -221,8 +221,8 @@ var CustomDialog = GObject.registerClass(class extends ModalDialog.ModalDialog{
 });
 
 function init(meta){
-  global.log("Starting up MultiClock!");
+  global.log("Starting up ManyClock!");
 
-  return new MultiClock();
+  return new ManyClock();
 }
 

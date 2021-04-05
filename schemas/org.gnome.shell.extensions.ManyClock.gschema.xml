@@ -1,0 +1,8 @@
+<schemalist>
+  <schema id="org.gnome.shell.extensions.ManyClock" path="/org/gnome/shell/extensions/ManyClock/">
+    <key name="timezone" type="s">
+      <default>"Australia/Perth"</default>
+      <summary>Select a secondary timezone</summary>
+    </key>
+  </schema>
+</schemalist>

@@ -2,10 +2,10 @@ all: build release
 
 build: schemas/gschemas.compiled
 
-release: MultiClock.zip
+release: ManyClock.zip
 
 schemas/gschemas.compiled: schemas/*.xml
 	glib-compile-schemas schemas
 
-MultiClock.zip: build
-	rm -f MultiClock.zip && zip MultiClock.zip $(shell git ls-files | grep -v ^.gitignore)
+ManyClock.zip: build
+	rm -f ManyClock.zip && zip ManyClock.zip $(shell git ls-files | grep -v ^.gitignore)
