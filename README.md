@@ -10,12 +10,12 @@ Click on the displayed "alternate" time; selection from the dropdown is saved fo
 
 ```
 cd ~/.local/share/gnome-shell/extensions/
-git clone https://github.com/brianrudolf/ManyClock.git ManyClock@mibus.org
+git clone https://github.com/brianrudolf/ManyClock.git ManyClock@brianrudolf
 ```
 
 ## Development
 
-Just edit the files in ~/.local/share/gnome-shell/extensions/ManyClock@meerkatlabs.ca/
+Just edit the files in ~/.local/share/gnome-shell/extensions/ManyClock@brianrudolf/
 
 Under X11, using Alt-F2 to run `r` will cause a gnome-shell reload (and thus pick up the edited extension).
 
