@@ -170,8 +170,8 @@ ManyClock.prototype = {
     if (Main.panel.statusArea.hasOwnProperty('manyclock_1')){
       delete Main.panel.statusArea['manyclock_1'];
     }
-    if (Main.panel.statusArea.hasOwnProperty('manyClock_2')){
-      delete Main.panel.statusArea['manyClock_2'];
+    if (Main.panel.statusArea.hasOwnProperty('manyclock_2')){
+      delete Main.panel.statusArea['manyclock_2'];
     }
     this.button_1.disable();
     this.button_2.disable();

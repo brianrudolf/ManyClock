@@ -1,12 +1,24 @@
-# ManyClock - A GNOME-Shell extension
+# ManyClock 
+## A GNOME-Shell extension which adds two clocks
 
 I modified the original project [MultiClock](https://github.com/mibus/MultiClock) that displayed a second clock in the top Panel Menu. I've added code to display two clocks because I have two distributed teams that I work with. 
 
 Currently this extension explicitly creates two additional clocks (designed to appear on either side of the default clock if it is centered), each configurable to a separate timezone. In the future, I would like to add additional logic to configure the number of clocks.  
 
+<div style="text-align:center"><img src="assets/demo.png" /></div>
+
+<!-- ![alt text](assets/demo.png) -->
+
 ## Configuration
 
-Click on the displayed "alternate" time; selection from the dropdown is saved for future logins.
+Click on the displayed "alternate" time to select from presets or to add your own `tz` named timezone. Selected timezones from the dropdown are saved for future logins.
+
+| Clock 1 Settings | Clock 2 Settings |
+|--- | --- |
+|![alt text][config_1] | ![alt text][config_2]|
+
+[config_1]: assets/config_1.png
+[config_2]: assets/config_2.png
 
 ## Installation
 ### Using extensions.gnome.org/
