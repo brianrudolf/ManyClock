@@ -25,7 +25,15 @@ Click on the displayed "alternate" time to select from presets or to add your ow
 Coming soon!
 
 ### Manual Installation
+#### Prerequisites
+- GNOME Tweaks installed 
+	- `apt install gnome-tweaks`
+- enable user extensions
+	- `gsettings set org.gnome.shell disable-user-extensions false`
 
+User extensions can also be enabled within the GNOME Tweaks application.
+
+#### Install
 ```
 git clone git@github.com:brianrudolf/ManyClock.git ~/.local/share/gnome-shell/extensions/ManyClock@brianrudolf
 gnome-extensions enable ManyClock@brianrudolf
